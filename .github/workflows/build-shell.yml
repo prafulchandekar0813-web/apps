@@ -30,13 +30,15 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: "17" }
       - uses: subosito/flutter-action@v2
-        with: { channel: stable, cache: true }
+        with: { flutter-version: "3.27.4", channel: stable, cache: true }
       - name: Prepare project
         run: python3 .github/scripts/prepare.py
       - name: Build APK
         working-directory: build_app
         run: |
           flutter pub get
+          # the webview plugin still names an old proguard file that newer Android build tools refuse; use the optimised one
+          find "$HOME/.pub-cache" -path "*flutter_inappwebview_android*/android/build.gradle" -print0 | xargs -0 -r sed -i "s/proguard-android\.txt/proguard-android-optimize.txt/"
           dart run flutter_launcher_icons
           flutter build apk --release
       - uses: actions/upload-artifact@v4
@@ -52,7 +54,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
-        with: { channel: stable, cache: true }
+        with: { flutter-version: "3.27.4", channel: stable, cache: true }
       - name: Prepare project
         run: python .github/scripts/prepare.py
       - name: Build EXE
