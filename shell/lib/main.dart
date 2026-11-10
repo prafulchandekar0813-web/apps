@@ -74,7 +74,7 @@ class _ShellAppState extends State<ShellApp> {
         'X-Device-Id': deviceId,
         'X-App-Version': 'shell-1',
         'X-Platform': Platform.isAndroid ? 'android' : 'windows',
-      }).timeout(const Duration(seconds: 12));
+      }).timeout(const Duration(seconds: 30));   // a sleeping server needs a while to wake up
       if (r.statusCode != 200) throw Exception('status ${r.statusCode}');
       await prefs.setString('cache', r.body);
       info = Info.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
