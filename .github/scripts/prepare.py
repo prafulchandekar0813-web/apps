@@ -34,6 +34,9 @@ except Exception as e:  # keep the placeholder icon rather than fail the build
     print("logo not downloaded:", e)
 
 manifest = out / "android/app/src/main/AndroidManifest.xml"
-manifest.write_text(re.sub(r'android:label="[^"]*"', lambda m: f'android:label="{name}"', manifest.read_text(), count=1))
+text = re.sub(r'android:label="[^"]*"', lambda m: f'android:label="{name}"', manifest.read_text(), count=1)
+if "android.permission.INTERNET" not in text:   # Flutter's release manifest has no internet permission; without it the app cannot reach anything
+    text = text.replace("<application", '<uses-permission android:name="android.permission.INTERNET"/>\n    <application', 1)
+manifest.write_text(text)
 main_cpp = out / "windows/runner/main.cpp"
 main_cpp.write_text(re.sub(r'L"' + re.escape(project) + r'"', lambda m: f'L"{name}"', main_cpp.read_text()))
