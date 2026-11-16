@@ -27,7 +27,13 @@ shutil.copytree("shell/lib", out / "lib")
 shutil.copytree("shell/assets", out / "assets", dirs_exist_ok=True)
 pub = Path("shell/pubspec.yaml").read_text().replace("name: shell_app", f"name: {project}", 1)
 (out / "pubspec.yaml").write_text(pub)
-(out / "assets" / "app_config.json").write_text(json.dumps({"app_id": app_id, "api_base": api_base, "name": name, "accent": accent}))
+brand = "Agent Workbench"  # the system's name for the "Powered by" line; the app also refreshes it from the server each time it opens
+try:
+    with urllib.request.urlopen(f"{api_base}/api/catalog/{app_id}/products", timeout=30) as resp:
+        brand = str(json.load(resp).get("brand") or brand)[:40]
+except Exception as e:
+    print("system name not fetched:", e)
+(out / "assets" / "app_config.json").write_text(json.dumps({"app_id": app_id, "api_base": api_base, "name": name, "accent": accent, "brand": brand}))
 try:
     urllib.request.urlretrieve(f"{api_base}/api/catalog/{app_id}/logo", out / "assets" / "logo.png")
 except Exception as e:  # keep the placeholder icon rather than fail the build
