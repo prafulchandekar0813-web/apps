@@ -25,24 +25,24 @@ subprocess.run(["flutter", "create", "--org", org, "--project-name", project, "-
 shutil.rmtree(out / "lib")
 shutil.copytree("shell/lib", out / "lib")
 shutil.copytree("shell/assets", out / "assets", dirs_exist_ok=True)
-pub = Path("shell/pubspec.yaml").read_text().replace("name: shell_app", f"name: {project}", 1)
-(out / "pubspec.yaml").write_text(pub)
+pub = Path("shell/pubspec.yaml").read_text(encoding="utf-8").replace("name: shell_app", f"name: {project}", 1)
+(out / "pubspec.yaml").write_text(pub, encoding="utf-8")
 brand = "Agent Workbench"  # the system's name for the "Powered by" line; the app also refreshes it from the server each time it opens
 try:
     with urllib.request.urlopen(f"{api_base}/api/catalog/{app_id}/products", timeout=30) as resp:
         brand = str(json.load(resp).get("brand") or brand)[:40]
 except Exception as e:
     print("system name not fetched:", e)
-(out / "assets" / "app_config.json").write_text(json.dumps({"app_id": app_id, "api_base": api_base, "name": name, "accent": accent, "brand": brand}))
+(out / "assets" / "app_config.json").write_text(encoding="utf-8", data=json.dumps({"app_id": app_id, "api_base": api_base, "name": name, "accent": accent, "brand": brand}))
 try:
     urllib.request.urlretrieve(f"{api_base}/api/catalog/{app_id}/logo", out / "assets" / "logo.png")
 except Exception as e:  # keep the placeholder icon rather than fail the build
     print("logo not downloaded:", e)
 
 manifest = out / "android/app/src/main/AndroidManifest.xml"
-text = re.sub(r'android:label="[^"]*"', lambda m: f'android:label="{name}"', manifest.read_text(), count=1)
+text = re.sub(r'android:label="[^"]*"', lambda m: f'android:label="{name}"', manifest.read_text(encoding="utf-8"), count=1)
 if "android.permission.INTERNET" not in text:   # Flutter's release manifest has no internet permission; without it the app cannot reach anything
     text = text.replace("<application", '<uses-permission android:name="android.permission.INTERNET"/>\n    <application', 1)
-manifest.write_text(text)
+manifest.write_text(text, encoding="utf-8")
 main_cpp = out / "windows/runner/main.cpp"
-main_cpp.write_text(re.sub(r'L"' + re.escape(project) + r'"', lambda m: f'L"{name}"', main_cpp.read_text()))
+main_cpp.write_text(re.sub(r'L"' + re.escape(project) + r'"', lambda m: f'L"{name}"', main_cpp.read_text(encoding="utf-8")), encoding="utf-8")
