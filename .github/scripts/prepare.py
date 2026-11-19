@@ -21,7 +21,10 @@ org, project = package.rsplit(".", 1)
 out = Path("build_app")
 if out.exists():
     shutil.rmtree(out)
-subprocess.run(["flutter", "create", "--org", org, "--project-name", project, "--platforms", "android,windows", str(out)], check=True)
+# On Windows the flutter command is flutter.bat, which Python only finds when given its full path.
+flutter = shutil.which("flutter")
+assert flutter, "the flutter command was not found on this machine"
+subprocess.run([flutter, "create", "--org", org, "--project-name", project, "--platforms", "android,windows", str(out)], check=True)
 shutil.rmtree(out / "lib")
 shutil.copytree("shell/lib", out / "lib")
 shutil.copytree("shell/assets", out / "assets", dirs_exist_ok=True)
