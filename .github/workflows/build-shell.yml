@@ -23,7 +23,7 @@ env:
 jobs:
   android:
     if: contains(inputs.platforms, 'apk')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # pinned so a new runner image cannot break the build
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +49,7 @@ jobs:
 
   windows:
     if: contains(inputs.platforms, 'exe')
-    runs-on: windows-latest
+    runs-on: windows-2022   # pinned: windows-latest moved to Visual Studio 2026, which Flutter 3.27 cannot use
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
